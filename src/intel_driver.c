@@ -69,6 +69,20 @@ intel_driver_get_param(struct intel_driver_data *intel, int param, int *value)
 
 static void intel_driver_get_revid(struct intel_driver_data *intel, int *value)
 {
+#ifdef __HAIKU__
+    /* No sysfs on Haiku: i915_drm tells libdrm the GPU's PCI revision
+     * (DRM_HAIKU_IOCTL_DEVICE_INFO) */
+    drmDevicePtr device = NULL;
+
+    if (drmGetDevice2(intel->fd, DRM_DEVICE_GET_PCI_REVISION, &device) == 0
+        && device->bustype == DRM_BUS_PCI) {
+        *value = device->deviceinfo.pci->revision_id;
+        drmFreeDevice(&device);
+        return;
+    }
+    if (device)
+        drmFreeDevice(&device);
+#endif
 #define PCI_REVID   8
     FILE *fp;
     char config_data[16];

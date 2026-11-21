@@ -19,7 +19,8 @@ if version_arr.length() == 4
 endif
 
 cc = meson.get_compiler('c')
-dl_dep = cc.find_library('dl')
+# (Haiku has dlopen() in libroot)
+dl_dep = cc.find_library('dl', required : host_machine.system() != 'haiku')
 mathlib_dep = cc.find_library('m', required : false)
 
 git = find_program('git', required : false)
